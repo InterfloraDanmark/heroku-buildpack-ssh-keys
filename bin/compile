@@ -23,4 +23,8 @@ echo "# ssh keys from heroku-buildpack-ssh-keys" >> "$SSH_CONFIG_FILE_PATH"
        fi
     done
 )
+if [ -f "$ENV_DIR/SSH_KEY_KNOWN_HOSTS" ]; then
+    echo "Adding fingerprints to known_hosts"
+    cat "$ENV_DIR/SSH_KEY_KNOWN_HOSTS" >> "$SSH_CLIENT_DIR/known_hosts"
+fi
 exit 0
