@@ -1,0 +1,26 @@
+#!/bin/sh
+
+BUILD_DIR=$1
+ENV_DIR=$3
+SSH_KEY_NAMES=$(cat "$ENV_DIR/SSH_KEY_NAMES")
+SSH_CLIENT_DIR="$BUILD_DIR/.ssh"
+SSH_CONFIG_FILE_PATH="$SSH_CLIENT_DIR/config"
+mkdir -vp "$SSH_CLIENT_DIR"
+
+echo >> "$SSH_CONFIG_FILE_PATH"
+echo "# ssh keys from heroku-buildpack-ssh-keys" >> "$SSH_CONFIG_FILE_PATH"
+(
+    IFS=",";
+    for KEY_NAME in $SSH_KEY_NAMES; do
+        KEY_FILE_NAME=$(echo "$KEY_NAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
+        KEY_FILE_PATH="$ENV_DIR/SSH_KEY_$KEY_FILE_NAME"
+        if [ -f "$KEY_FILE_PATH" ]; then
+            echo "Adding '$KEY_NAME' key to ssh config file"
+            echo "IdentityFile $SSH_CLIENT_DIR/$KEY_NAME" >> "$SSH_CONFIG_FILE_PATH"
+            cp -n "$KEY_FILE_PATH" "$SSH_CLIENT_DIR/$KEY_NAME"
+        else
+            echo "Unable to add '$KEY_NAME': Environment variable SSH_KEY_$KEY_FILE_NAME not found"
+       fi
+    done
+)
+exit 0
