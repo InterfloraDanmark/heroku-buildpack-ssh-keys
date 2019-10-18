@@ -13,6 +13,12 @@ echo "# ssh keys from heroku-buildpack-ssh-keys" >> "$SSH_CONFIG_FILE_PATH"
     IFS=",";
     for KEY_NAME in $SSH_KEY_NAMES; do
         KEY_FILE_NAME=$(echo "$KEY_NAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
+        KEY_HOSTNAME_PATH="$ENV_DIR/SSH_KEY_HOSTNAME_$KEY_FILE_NAME"
+        if [ -f "$KEY_HOSTNAME_PATH" ]; then
+            KEY_HOSTNAME=$(cat "$KEY_HOSTNAME_PATH")
+            echo "Using '$KEY_HOSTNAME' as hostname"
+            echo "Host $KEY_HOSTNAME" >> "$SSH_CONFIG_FILE_PATH"
+        fi
         KEY_FILE_PATH="$ENV_DIR/SSH_KEY_$KEY_FILE_NAME"
         if [ -f "$KEY_FILE_PATH" ]; then
             echo "Adding '$KEY_NAME' key to ssh config file"
